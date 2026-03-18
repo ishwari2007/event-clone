@@ -1,34 +1,92 @@
-import { useState } from "react";
-import { createEvent } from "../services/eventService";
+import { useState, useEffect } from "react";
+import { createEvent, updateEvent } from "../services/eventService";
 
-function EventForm({ refresh }) {
-  const [form, setForm] = useState({
+const EventForm = ({ selectedEvent, refresh }) => {
+
+  const [event, setEvent] = useState({
     title: "",
     description: "",
     location: "",
     date: ""
   });
 
+  useEffect(() => {
+    if (selectedEvent) {
+      setEvent(selectedEvent);
+    }
+  }, [selectedEvent]);
+
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setEvent({ ...event, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await createEvent(form);
+
+    if (event._id) {
+      await updateEvent(event._id, event);
+    } else {
+      await createEvent(event);
+    }
+
+    setEvent({ title: "", description: "",location: "", date: "" });
     refresh();
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input name="title" placeholder="Title" onChange={handleChange} />
-      <input name="description" placeholder="Description" onChange={handleChange} />
-      <input name="location" placeholder="Location" onChange={handleChange} />
-      <input name="date" type="date" onChange={handleChange} />
+    <div className="bg-white p-6 rounded-xl shadow-lg">
 
-      <button type="submit">Add Event</button>
-    </form>
+      <h2 className="text-xl font-bold mb-4">
+        {event._id ? "Edit Event" : "Create Event"}
+      </h2>
+
+      <form onSubmit={handleSubmit} className="space-y-3">
+
+        <input
+          type="text"
+          name="title"
+          placeholder="Event Title"
+          value={event.title}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+
+        <input
+          type="text"
+          name="description"
+          placeholder="Description"
+          value={event.description}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <input
+  type="text"
+  name="location"
+  placeholder="Location"
+  value={event.location}
+  onChange={handleChange}
+  className="w-full border p-2 rounded"
+/>
+
+
+        <input
+          type="date"
+          name="date"
+          value={event.date}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+
+        <button
+          className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700"
+        >
+          Save Event
+        </button>
+
+      </form>
+
+    </div>
   );
-}
+};
 
 export default EventForm;
